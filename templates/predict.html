@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block main %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Prediction Results</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Prediction Input:</h5>
+                <div>Passenger Class: <span id="pc"></span></div>
+                <div>Sibling/Spouse: <span id="ss"></span></div>
+                <div>Parents/Children: <span id="pa"></span></div>
+                <div>Title: <span id="pt"></span></div>
+                <div>Age: <span id="ag"></span></div>
+                <div>Sex: <span id="sx"></span></div>
+                <div>Entrance of choice: <span id="em"></span></div>
+                <h5 class="pt-3">Prediction Classification:</h5>
+                <div id="prediction"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a class="btn btn-primary" href="/results" role="button">View DB</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pt-5">
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <h1>What is the chance a person survives titanic</h1>
+            <form action="" id="post-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="pclass">Which travel class did he/she choose?</label>
+                    <select id="pclass" class="form-control">
+                    <option selected>1st Class</option>
+                    <option>2nd Class</option>
+                    <option>3rd Class</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sibsp">Did he/she travel with his sibling or spouse?</label>
+                    <select id="sibsp" class="form-control">
+                    <option selected>Sibling</option>
+                    <option>Spouse</option>
+                    <option>No one</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="parch">Did he/she have children/parents on board?</label>
+                    <select id="parch" class="form-control">
+                    <option selected>Parent/Parents</option>
+                    <option>Child/Children</option>
+                    <option>No one</option>
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="ptitle">What is his title?</label>
+                    <select id="ptitle" class="form-control">
+                    <option selected>Mr</option>
+                    <option>Miss</option>
+                    <option>Mrs</option>
+                    <option>Master</option>
+                    <option>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="age">What is his/her age?</label>
+                    <input type="number" class="form-control" id="age" placeholder="Please enter age" required>
+                </div>
+                <!--<div class="form-group">
+                    <label for="sex">What is a sex of person travelling?</label>
+                    <select id="sex" class="form-control">
+                    <option selected>Male</option>
+                    <option>Female</option>
+                    </select>
+                </div>-->
+                <div class="form-group">
+                    <label for="embarked">Choose a port from which he/she embarked on the ship?</label>
+                    <select id="embarked" class="form-control">
+                    <option selected>Cherbourg</option>
+                    <option>Queenstown</option>
+                    <option>Southampton</option>
+                    </select>
+                </div>
+                <button type="submit" value="Submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('submit', '#post-form',function(e){
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url:'{% url "predict:submit_prediction" %}',
+            data:{
+                pclass:$('#pclass').val(),
+                sibsp:$('#sibsp').val(),
+                parch:$('#parch').val(),
+                ptitle:$('#ptitle').val(),
+                age:$('#age').val(),
+                /**sex:$('#sex').val(),**/
+                embarked:$('#embarked').val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                action: 'post'
+            },
+            success:function(json) {
+                document.forms["post-form"].reset();
+                document.getElementById("prediction").innerHTML = json['result']
+                document.getElementById("pc").innerHTML = json['pclass']
+                document.getElementById("ss").innerHTML = json['sibsp']
+                document.getElementById("pa").innerHTML = json['parch']
+                document.getElementById("pt").innerHTML = json['ptitle']                
+                document.getElementById("ag").innerHTML = json['age']
+                document.getElementById("sx").innerHTML = json['sex']
+                document.getElementById("em").innerHTML = json['embarked']
+            },
+            error : function(xhr,errmsg,err) {
+
+            }
+        });
+    })
+</script>
+
+{% endblock %}
+

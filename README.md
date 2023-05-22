@@ -1,2 +1,2 @@
 # titanic_django_prediction
-ML model made for https://www.kaggle.com/competitions/titanic served in django framework.
+Integration of ml model made for https://www.kaggle.com/competitions/titanic into django framework.
